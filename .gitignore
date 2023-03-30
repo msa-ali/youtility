@@ -1,0 +1,36 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+youtility-web-app/node_modules
+youtility-web-app/.pnp
+youtility-web-app/.pnp.js
+
+# testing
+/youtility-web-app/coverage
+
+# next.js
+/youtility-web-app/.next/
+/youtility-web-app/out/
+
+# production
+/youtility-web-app/build
+
+# misc
+**/.DS_Store
+youtility-web-app/*.pem
+
+# debug
+youtility-web-app/npm-debug.log*
+youtility-web-app/yarn-debug.log*
+youtility-web-app/yarn-error.log*
+youtility-web-app/.pnpm-debug.log*
+
+# local env files
+youtility-web-app/.env*.local
+
+# vercel
+youtility-web-app/.vercel
+
+# typescript
+youtility-web-app/*.tsbuildinfo
+youtility-web-app/next-env.d.ts
