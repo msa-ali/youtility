@@ -1,5 +1,7 @@
 # Youtility
 
+<img src="preview.jpeg"  width="600" height="300">
+
 Youtility is a web application built with Next.JS and Golang that allows users to download YouTube videos or whole playlists by URL. It provides support for multiple formats such as mp4, mp3, and more.
 
 ## Getting Started
