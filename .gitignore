@@ -34,3 +34,6 @@ youtility-web-app/.vercel
 # typescript
 youtility-web-app/*.tsbuildinfo
 youtility-web-app/next-env.d.ts
+
+# API
+**/.env

@@ -1,7 +1,17 @@
+import Footer from "@/components/footer";
+import Info from "@/components/info";
+import Navbar from "@/components/navbar";
+import Search from "@/components/search";
+
 export default function Home() {
   return (
-    <h1 className="text-3xl font-bold underline">
-      Hello world!
-    </h1>
+    <div className="bg-global w-full min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-1">
+        <Info />
+        <Search />
+      </main>
+      <Footer />
+    </div>
   )
 }
