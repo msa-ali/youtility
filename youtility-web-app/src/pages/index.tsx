@@ -2,6 +2,8 @@ import Footer from "@/components/footer";
 import Info from "@/components/info";
 import Navbar from "@/components/navbar";
 import Search from "@/components/search";
+import YoutubeVideoList from "@/components/youtube-video-list";
+import { SearchProvider } from "@/context/search";
 
 export default function Home() {
   return (
@@ -9,7 +11,10 @@ export default function Home() {
       <Navbar />
       <main className="flex-1">
         <Info />
-        <Search />
+        <SearchProvider initialValue="">
+          <Search />
+          <YoutubeVideoList />
+        </SearchProvider>
       </main>
       <Footer />
     </div>

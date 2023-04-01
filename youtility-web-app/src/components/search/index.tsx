@@ -1,5 +1,7 @@
+import { useSearch } from "@/context/search";
 import tw from "tailwind-styled-components";
-
+import debounce from 'lodash.debounce';
+import { ChangeEventHandler } from "react";
 const Wrapper = tw.div`
     w-full
     flex
@@ -34,10 +36,20 @@ const Button = tw.button`
 `;
 
 export default function Search() {
+    const [value, setValue] = useSearch();
+
+    const onChange = debounce(((event) => {
+        setValue(event.target.value);
+    }) as ChangeEventHandler<HTMLInputElement>, 300);
+
     return (
         <Wrapper>
-            <Input type="text" placeholder="Paste a link here to download your video" />
-
+            <Input
+                type="text"
+                value={value}
+                placeholder="Paste a link here to download your video"
+                onChange={onChange}
+            />
             <Button>Download</Button>
         </Wrapper>
     )
