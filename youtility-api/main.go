@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"github.com/Altamashattari/youtility/app"
+	"github.com/Altamashattari/youtility/logger"
+)
 
 func main() {
-	fmt.Println("Hello from Youtility Server...")
+	logger.Info("Starting the server...")
+	app.Start()
 }
