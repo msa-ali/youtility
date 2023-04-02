@@ -1,20 +1,16 @@
 import Footer from "@/components/footer";
 import Info from "@/components/info";
 import Navbar from "@/components/navbar";
-import Search from "@/components/search";
-import YoutubeVideoList from "@/components/youtube-video-list";
-import { SearchProvider } from "@/context/search";
+import SearchWithResult from "@/components/search-with-result";
+
 
 export default function Home() {
   return (
     <div className="bg-global w-full min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 justify-center items-center">
         <Info />
-        <SearchProvider initialValue="">
-          <Search />
-          <YoutubeVideoList />
-        </SearchProvider>
+        <SearchWithResult />
       </main>
       <Footer />
     </div>

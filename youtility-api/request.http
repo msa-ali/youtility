@@ -1,3 +1,3 @@
 ### GET Video details by URL
-GET http://localhost:8000/api/youtube/details?video_url=https://www.youtube.com/watch?v=mpnh1YTT66w
+GET http://localhost:8000/api/youtube/details?video_url=https://www.youtube.com/watch?v=Q9ipbLeqmQo&list=PLy_6D98if3ULEtXtNSY_2qN21VCKgoQAE
 Content-Type: application/json

@@ -3,4 +3,5 @@ export interface YoutubeVideoDetail {
     title: string;
     thumbnail: string;
     definition: string;
+    duration: string;
 }

@@ -1,7 +1,7 @@
 import { useSearch } from "@/context/search";
 import tw from "tailwind-styled-components";
 import debounce from 'lodash.debounce';
-import { ChangeEventHandler } from "react";
+import { ChangeEventHandler, useCallback } from "react";
 const Wrapper = tw.div`
     w-full
     flex
@@ -38,9 +38,9 @@ const Button = tw.button`
 export default function Search() {
     const [value, setValue] = useSearch();
 
-    const onChange = debounce(((event) => {
+    const onChange: ChangeEventHandler<HTMLInputElement> = (event) => {
         setValue(event.target.value);
-    }) as ChangeEventHandler<HTMLInputElement>, 300);
+    }
 
     return (
         <Wrapper>

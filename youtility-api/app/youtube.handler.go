@@ -19,7 +19,7 @@ func (h YoutubeHandler) GetVideoDetails(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	data, err := h.service.GetYoutubeVideoDetails(videoURL, []string{"snippet"})
+	data, err := h.service.GetYoutubeVideoDetails(videoURL, []string{"snippet", "contentDetails"})
 
 	if err != nil {
 		writeResponse(w, http.StatusBadRequest, errors.New("video url is invalid"))
