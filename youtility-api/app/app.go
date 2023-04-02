@@ -38,11 +38,14 @@ func Start() {
 	}
 	yh := YoutubeHandler{service: ytService}
 
-	router.HandleFunc("/api/youtube/details", yh.GetVideoDetails)
+	router.
+		HandleFunc("/api/youtube/details", yh.GetVideoDetails).
+		Methods(http.MethodGet).
+		Name("GetVideoDetails")
 
 	router.
-		HandleFunc("/api/download", func(w http.ResponseWriter, r *http.Request) {}).
-		Methods(http.MethodPost).
+		HandleFunc("/api/youtube/download", yh.DownloadVideo).
+		Methods(http.MethodGet).
 		Name("Download")
 
 	address := os.Getenv("SERVER_ADDRESS")

@@ -4,11 +4,14 @@ import Image from "next/image"
 import { limit } from "@/lib/utils";
 
 import { BsDownload } from 'react-icons/bs';
+import { BASE_URL } from "@/lib/axios";
 
 
-interface Props extends YoutubeVideoDetail { }
+interface Props extends YoutubeVideoDetail {
+    url: string;
+}
 
-function MediaCard({ videoId, title, duration, thumbnail, definition }: Props) {
+function MediaCard({  title, duration, thumbnail, url }: Props) {
     return (
         <div className="flex md:flex-row flex-col gap-2 mt-16 border-2 justify-center items-center shadow-lg">
             <div>
@@ -23,11 +26,13 @@ function MediaCard({ videoId, title, duration, thumbnail, definition }: Props) {
                         value={{ label: "MP4 720P", value: "mp4-720" }}
                         onChange={(option) => console.log(option)}
                     />
-                    <button 
+                    <a 
                         title="Download"
-                        className="border rounded md:p-3 p-1 shadow bg-black text-white text-lg">
+                        className="border rounded md:p-3 p-1 shadow bg-black text-white text-lg"
+                        href={`${BASE_URL}/youtube/download?video_url=${url}`}
+                    >
                             <BsDownload />
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>

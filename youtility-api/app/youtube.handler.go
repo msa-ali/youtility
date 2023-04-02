@@ -29,6 +29,20 @@ func (h YoutubeHandler) GetVideoDetails(w http.ResponseWriter, r *http.Request) 
 	writeResponse(w, http.StatusOK, data)
 }
 
+func (h YoutubeHandler) DownloadVideo(w http.ResponseWriter, r *http.Request) {
+	videoURL := r.URL.Query().Get("video_url")
+	if videoURL == "" {
+		writeResponse(w, http.StatusBadRequest, errors.New("video url is missing"))
+		return
+	}
+
+	err := service.DownloadYoutubeVideo(w, videoURL)
+	if err != nil {
+		writeResponse(w, http.StatusInternalServerError, errors.New("error while downloading"))
+		return
+	}
+}
+
 func writeResponse(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(code)

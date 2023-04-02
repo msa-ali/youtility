@@ -22,7 +22,7 @@ function YoutubeVideoList() {
     return (
         <div >
             {data.map(detail => (
-                <MediaCard key={detail.videoId} {...detail} />
+                <MediaCard key={detail.videoId} {...detail} url={url} />
             ))}
         </div>
     )
