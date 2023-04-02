@@ -51,11 +51,12 @@ func getVideoDetails(data *youtube.VideoListResponse) (*[]YoutubeVideoDetail, er
 		return nil, errors.New("content not found")
 	}
 	for _, video := range data.Items {
+
 		videos = append(videos, YoutubeVideoDetail{
 			VideoId:    video.Id,
 			Title:      video.Snippet.Title,
 			Definition: video.ContentDetails.Definition,
-			Thumbnail:  video.Snippet.Thumbnails.Default.Url,
+			Thumbnail:  video.Snippet.Thumbnails.Medium.Url,
 			Duration:   video.ContentDetails.Duration,
 		})
 	}

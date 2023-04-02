@@ -1,6 +1,7 @@
 import { useSearch } from "@/context/search"
 import useYoutubeVideoDetail from "@/hooks/use-youtube-video-detail";
 import Loader from "../loader";
+import MediaCard from "../media-card";
 
 
 function YoutubeVideoList() {
@@ -9,7 +10,9 @@ function YoutubeVideoList() {
     const { data, loading, error } = useYoutubeVideoDetail(url);
 
     if (loading) {
-        return <Loader />;
+        return <div className="w-full h-full self-center">
+            <Loader />
+        </div>;
     }
 
     if (error) {
@@ -19,12 +22,7 @@ function YoutubeVideoList() {
     return (
         <div >
             {data.map(detail => (
-                <div key={detail.videoId} className="flex flex-col">
-                    <div>{detail?.title}</div>
-                    <div>{detail?.thumbnail}</div>
-                    <div>{detail?.definition}</div>
-                    <div>{detail?.duration}</div>
-                </div>
+                <MediaCard key={detail.videoId} {...detail} />
             ))}
         </div>
     )

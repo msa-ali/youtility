@@ -17,3 +17,8 @@ export function formatDuration(video: YoutubeVideoDetail): YoutubeVideoDetail {
         duration: humanizeDuration(toSeconds(parse(video.duration)) * 1000),
     };
 }
+
+export function limit(str: string, length: number) {
+    const strLen = str.length;
+    return str.slice(0, length) + (strLen > length ? "..." : "");
+}
