@@ -1,5 +1,5 @@
 import { YoutubeVideoDetail } from "@/types/youtube"
-import Dropdown from "../dropdown"
+import Dropdown, { DropdownItem } from "../dropdown"
 import Image from "next/image"
 import { limit } from "@/lib/utils";
 
@@ -11,7 +11,25 @@ interface Props extends YoutubeVideoDetail {
     url: string;
 }
 
-function MediaCard({  title, duration, thumbnail, url }: Props) {
+function MediaCard({ title, duration, thumbnail, url, formats }: Props) {
+    console.log(formats);
+
+    const options: DropdownItem[] = formats.map(format => {
+        const mimeType = format.mimeType.split(';')[0];
+        const isVideo = mimeType === "video/mp4";
+        let label: string;
+        if (isVideo) {
+            label = `mp4 (${format.qualityLabel})`
+        } else {
+            const quality = format.audioQuality.split("_")[2]
+            label = `mp3 (${quality?.toLowerCase()})`
+        }
+        return {
+            label,
+            value: format.itag.toString(),
+        }
+    });
+
     return (
         <div className="flex md:flex-row flex-col gap-2 mt-16 border-2 justify-center items-center shadow-lg">
             <div>
@@ -22,16 +40,16 @@ function MediaCard({  title, duration, thumbnail, url }: Props) {
                 <div className="text-md text-xs text-gray-500 mt-1">{duration}</div>
                 <div className="flex mt-4 justify-between">
                     <Dropdown
-                        options={[{ label: "MP4 720P", value: "mp4-720" }, { label: "MP4 360P", value: "mp4-360" }]}
-                        value={{ label: "MP4 720P", value: "mp4-720" }}
+                        options={options}
+                        value={options[0]}
                         onChange={(option) => console.log(option)}
                     />
-                    <a 
+                    <a
                         title="Download"
                         className="border rounded md:p-3 p-1 shadow bg-black text-white text-lg"
                         href={`${BASE_URL}/youtube/download?video_url=${url}`}
                     >
-                            <BsDownload />
+                        <BsDownload />
                     </a>
                 </div>
             </div>

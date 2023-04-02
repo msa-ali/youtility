@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/Altamashattari/youtility/logger"
 	ytd "github.com/kkdai/youtube/v2"
@@ -14,12 +15,20 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
+type YoutubeMediaFormat struct {
+	ItagNo       int    `json:"itag"`
+	QualityLabel string `json:"qualityLabel"`
+	AudioQuality string `json:"audioQuality"`
+	MimeType     string `json:"mimeType"`
+}
+
 type YoutubeVideoDetail struct {
-	VideoId    string `json:"videoId"`
-	Title      string `json:"title"`
-	Thumbnail  string `json:"thumbnail"`
-	Definition string `json:"definition"`
-	Duration   string `json:"duration"`
+	VideoId    string               `json:"videoId"`
+	Title      string               `json:"title"`
+	Thumbnail  string               `json:"thumbnail"`
+	Definition string               `json:"definition"`
+	Duration   string               `json:"duration"`
+	Formats    []YoutubeMediaFormat `json:"formats"`
 }
 
 func getYoutubeService() (*youtube.Service, error) {
@@ -57,6 +66,43 @@ func extractVideoIdFromURL(videoURL string) (videoId string, err error) {
 	return
 }
 
+func getAvailableFormats(videoId string) ([]YoutubeMediaFormat, error) {
+	client := ytd.Client{}
+	video, err := client.GetVideo(videoId)
+	if err != nil {
+		return nil, err
+	}
+
+	getMimeType := func(f ytd.Format) string {
+		mimeType := strings.Split(f.MimeType, ";")[0]
+		return mimeType
+	}
+	// filter formats
+	var filteredFormats []ytd.Format
+	unique := make(map[string]bool)
+	for _, f := range video.Formats {
+		mimeType := getMimeType(f)
+		if mimeType == "video/mp4" || mimeType == "audio/mp4" {
+			key := fmt.Sprintf("%s|%s", f.QualityLabel, mimeType)
+			if _, found := unique[key]; !found {
+				unique[key] = true
+				filteredFormats = append(filteredFormats, f)
+			}
+		}
+	}
+
+	var formats []YoutubeMediaFormat
+	for _, format := range filteredFormats {
+		formats = append(formats, YoutubeMediaFormat{
+			ItagNo:       format.ItagNo,
+			QualityLabel: format.QualityLabel,
+			AudioQuality: format.AudioQuality,
+			MimeType:     format.MimeType,
+		})
+	}
+	return formats, nil
+}
+
 func getVideoDetails(data *youtube.VideoListResponse) (*[]YoutubeVideoDetail, error) {
 	// videos := make([]YoutubeVideoDetail, len(data.Items))
 	var videos []YoutubeVideoDetail
@@ -64,12 +110,14 @@ func getVideoDetails(data *youtube.VideoListResponse) (*[]YoutubeVideoDetail, er
 		return nil, errors.New("content not found")
 	}
 	for _, video := range data.Items {
+		formats, _ := getAvailableFormats(video.Id)
 		videos = append(videos, YoutubeVideoDetail{
 			VideoId:    video.Id,
 			Title:      video.Snippet.Title,
 			Definition: video.ContentDetails.Definition,
 			Thumbnail:  video.Snippet.Thumbnails.Medium.Url,
 			Duration:   video.ContentDetails.Duration,
+			Formats:    formats,
 		})
 	}
 	return &videos, nil
