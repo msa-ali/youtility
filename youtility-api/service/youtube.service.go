@@ -153,21 +153,21 @@ func (ytService *YoutubeService) GetYoutubePlaylistDetails(playlistUrl string) (
 		return nil, err
 	}
 	var wg sync.WaitGroup
-	var res []YoutubeVideoDetail
-	for _, video := range p.Videos {
+	var res = make([]YoutubeVideoDetail, len(p.Videos))
+	for i, video := range p.Videos {
 		wg.Add(1)
-		go func(video *ytd.PlaylistEntry) {
+		go func(i int, video *ytd.PlaylistEntry) {
 			formats, _ := getAvailableFormats(video.ID, client)
-			res = append(res, YoutubeVideoDetail{
+			res[i] = YoutubeVideoDetail{
 				VideoId:   video.ID,
 				Title:     video.Title,
 				Formats:   formats,
 				Thumbnail: video.Thumbnails[0].URL,
 				Duration:  video.Duration.Milliseconds(),
-			})
+			}
 
 			defer wg.Done()
-		}(video)
+		}(i, video)
 	}
 	wg.Wait()
 	return &res, nil
