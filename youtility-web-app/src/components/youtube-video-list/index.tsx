@@ -2,6 +2,7 @@ import { useSearch } from "@/context/search"
 import useYoutubeVideoDetail from "@/hooks/use-youtube-video-detail";
 import Loader from "../loader";
 import MediaCard from "../media-card";
+import Error from "../error";
 
 
 function YoutubeVideoList() {
@@ -16,7 +17,14 @@ function YoutubeVideoList() {
     }
 
     if (error) {
-        return <div>{error.message}</div>
+        console.log(error);
+        return (
+            <Error>
+                {error.response?.status === 400 && <p className="text-sm">Please provide valid URL <span className="text-xl">🥹</span></p>}
+                {error.response?.status === 500 && <p className="text-sm">OOPS! something went wrong!<span className="text-xl">🥹</span></p>}
+
+            </Error>
+        );
     }
 
     return (

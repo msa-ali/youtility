@@ -2,6 +2,7 @@ import { YoutubeVideoDetail } from "@/types/youtube";
 import { axios } from '@/lib/axios';
 import { useEffect, useState } from "react";
 import { formatDuration, isValidURL, isVideo } from "@/lib/utils";
+import { AxiosError } from "axios";
 
 const getYoutubeVideoDetail = (url: string): Promise<YoutubeVideoDetail[]> => {
     return axios.get('/youtube/details', {
@@ -24,7 +25,7 @@ const getYoutubePlaylistDetail = (url: string): Promise<YoutubeVideoDetail[]> =>
 const useYoutubeVideoDetail = (url: string) => {
     const [data, setData] = useState<YoutubeVideoDetail[]>([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<Error | undefined>();
+    const [error, setError] = useState<AxiosError | undefined>();
 
     useEffect(() => {
         if (!url || !isValidURL(url)) {
