@@ -2,6 +2,8 @@ import { useSearch } from "@/context/search";
 import tw from "tailwind-styled-components";
 import { ChangeEventHandler, useState } from "react";
 import { isValidURL } from "@/lib/utils";
+import Error from "../error";
+
 const Wrapper = tw.div`
     w-full
     flex
@@ -12,17 +14,17 @@ const Wrapper = tw.div`
     items-center
 `;
 
-const Input = tw.input`
+const Input = tw.input<{invalid: boolean}>`
     p-4
     h-16
     w-3/5
     md:placeholder:text-xl
     text-xl
-    rounded-l
+    rounded-2xl
     border-2
-    border-r-0
     border-blue-300
     focus:outline-0
+    ${props => props.invalid ? 'border-red-300' : 'border-blue-300' }
 `;
 
 export default function Search() {
@@ -42,15 +44,17 @@ export default function Search() {
                 value={value}
                 placeholder="Paste a link here to download your video"
                 onChange={onChange}
+                invalid={invalid}
             />
-            {invalid && <div className="text-red-500 text-sm border-2 border-red-300 p-4 mt-4 flex flex-col gap-2 tracking-wide shadow-lg rounded-xl">
-                <p>Invalid URL format <span className="text-xl">😪</span>. Please enter a valid YouTube video URL in one of the following formats:</p>
+            {invalid && <Error>
+                <p>
+                    Invalid URL format. Please paste a valid YouTube video URL in one of the following formats:
+                </p>
                 <ul className="list-disc self-center">
                     <li>https://www.youtube.com/watch?v=videoId</li>
                     <li>https://www.youtube.com/playlist?list=playlistId</li>
                 </ul>
-                <p>Make sure to replace "videoId" or "playlistId" with the actual ID of the video or playlist you want to download.</p>
-            </div>
+            </Error>
             }
         </Wrapper>
     )
