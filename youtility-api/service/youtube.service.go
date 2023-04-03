@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/Altamashattari/youtility/logger"
 	ytd "github.com/kkdai/youtube/v2"
@@ -23,12 +24,11 @@ type YoutubeMediaFormat struct {
 }
 
 type YoutubeVideoDetail struct {
-	VideoId    string               `json:"videoId"`
-	Title      string               `json:"title"`
-	Thumbnail  string               `json:"thumbnail"`
-	Definition string               `json:"definition"`
-	Duration   string               `json:"duration"`
-	Formats    []YoutubeMediaFormat `json:"formats"`
+	VideoId   string               `json:"videoId"`
+	Title     string               `json:"title"`
+	Thumbnail string               `json:"thumbnail"`
+	Duration  string               `json:"duration"`
+	Formats   []YoutubeMediaFormat `json:"formats"`
 }
 
 const (
@@ -62,12 +62,12 @@ func NewYoutubeService() (*YoutubeService, error) {
 	return &YoutubeService{service}, nil
 }
 
-func extractVideoIdFromURL(videoURL string) (videoId string, err error) {
+func extractVideoIdFromURL(videoURL string, param string) (videoId string, err error) {
 	u, err := url.Parse(videoURL)
 	if err != nil {
 		return "", err
 	}
-	videoId = u.Query().Get("v")
+	videoId = u.Query().Get(param)
 	return
 }
 
@@ -76,8 +76,7 @@ func getMimeType(f ytd.Format) string {
 	return mimeType
 }
 
-func getAvailableFormats(videoId string) ([]YoutubeMediaFormat, error) {
-	client := ytd.Client{}
+func getAvailableFormats(videoId string, client ytd.Client) ([]YoutubeMediaFormat, error) {
 	video, err := client.GetVideo(videoId)
 	if err != nil {
 		return nil, err
@@ -110,20 +109,19 @@ func getAvailableFormats(videoId string) ([]YoutubeMediaFormat, error) {
 }
 
 func getVideoDetails(data *youtube.VideoListResponse) (*[]YoutubeVideoDetail, error) {
-	// videos := make([]YoutubeVideoDetail, len(data.Items))
 	var videos []YoutubeVideoDetail
 	if len(data.Items) == 0 {
 		return nil, errors.New("content not found")
 	}
+	client := ytd.Client{}
 	for _, video := range data.Items {
-		formats, _ := getAvailableFormats(video.Id)
+		formats, _ := getAvailableFormats(video.Id, client)
 		videos = append(videos, YoutubeVideoDetail{
-			VideoId:    video.Id,
-			Title:      video.Snippet.Title,
-			Definition: video.ContentDetails.Definition,
-			Thumbnail:  video.Snippet.Thumbnails.Medium.Url,
-			Duration:   video.ContentDetails.Duration,
-			Formats:    formats,
+			VideoId:   video.Id,
+			Title:     video.Snippet.Title,
+			Thumbnail: video.Snippet.Thumbnails.Medium.Url,
+			Duration:  video.ContentDetails.Duration,
+			Formats:   formats,
 		})
 	}
 	return &videos, nil
@@ -131,7 +129,7 @@ func getVideoDetails(data *youtube.VideoListResponse) (*[]YoutubeVideoDetail, er
 
 func (ytService *YoutubeService) GetYoutubeVideoDetails(videoURL string, part []string) (*[]YoutubeVideoDetail, error) {
 	// parse video id from the URL
-	videoId, err := extractVideoIdFromURL(videoURL)
+	videoId, err := extractVideoIdFromURL(videoURL, "v")
 	if err != nil {
 		return nil, err
 	}
@@ -146,6 +144,33 @@ func (ytService *YoutubeService) GetYoutubeVideoDetails(videoURL string, part []
 	return videos, nil
 }
 
+func (ytService *YoutubeService) GetYoutubePlaylistDetails(playlistUrl string) (*[]YoutubeVideoDetail, error) {
+	client := ytd.Client{}
+	p, err := client.GetPlaylist(playlistUrl)
+	if err != nil {
+		return nil, err
+	}
+	var wg sync.WaitGroup
+	var res []YoutubeVideoDetail
+	for _, video := range p.Videos {
+		wg.Add(1)
+		go func(video *ytd.PlaylistEntry) {
+			formats, _ := getAvailableFormats(video.ID, client)
+			res = append(res, YoutubeVideoDetail{
+				VideoId:   video.ID,
+				Title:     video.Title,
+				Formats:   formats,
+				Thumbnail: video.Thumbnails[0].URL,
+				Duration:  video.Duration.String(),
+			})
+
+			defer wg.Done()
+		}(video)
+	}
+	wg.Wait()
+	return &res, nil
+}
+
 func DownloadYoutubeVideo(w http.ResponseWriter, videoURL string, iTagNo int) error {
 
 	errHandler := func(err error) error {
@@ -154,7 +179,7 @@ func DownloadYoutubeVideo(w http.ResponseWriter, videoURL string, iTagNo int) er
 	}
 
 	client := ytd.Client{}
-	videoId, err := extractVideoIdFromURL(videoURL)
+	videoId, err := extractVideoIdFromURL(videoURL, "v")
 	if err != nil {
 		logger.Error("Error while extracting video id from url: " + err.Error())
 		return err

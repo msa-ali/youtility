@@ -48,6 +48,11 @@ func Start() {
 		Methods(http.MethodGet).
 		Name("Download")
 
+	router.
+		HandleFunc("/api/youtube/playlist/details", yh.GetPlaylistDetails).
+		Methods(http.MethodGet).
+		Name("GetPlaylistDetails")
+
 	address := os.Getenv("SERVER_ADDRESS")
 	port := os.Getenv("SERVER_PORT")
 

@@ -49,6 +49,22 @@ func (h YoutubeHandler) DownloadVideo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h YoutubeHandler) GetPlaylistDetails(w http.ResponseWriter, r *http.Request) {
+	playlistUrl := r.URL.Query().Get("playlist_url")
+	if playlistUrl == "" {
+		writeResponse(w, http.StatusBadRequest, errors.New("video url is missing"))
+		return
+	}
+	data, err := h.service.GetYoutubePlaylistDetails(playlistUrl)
+
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, errors.New("playlist url is invalid"))
+		return
+	}
+
+	writeResponse(w, http.StatusOK, data)
+}
+
 func writeResponse(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(code)
