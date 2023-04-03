@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/Altamashattari/youtility/service"
 )
@@ -31,12 +32,17 @@ func (h YoutubeHandler) GetVideoDetails(w http.ResponseWriter, r *http.Request) 
 
 func (h YoutubeHandler) DownloadVideo(w http.ResponseWriter, r *http.Request) {
 	videoURL := r.URL.Query().Get("video_url")
-	if videoURL == "" {
-		writeResponse(w, http.StatusBadRequest, errors.New("video url is missing"))
+	format := r.URL.Query().Get("format")
+	if videoURL == "" || format == "" {
+		writeResponse(w, http.StatusBadRequest, errors.New("video url or format is missing"))
 		return
 	}
-
-	err := service.DownloadYoutubeVideo(w, videoURL)
+	iTagNo, err := strconv.Atoi(format)
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, errors.New("invalid video format"))
+		return
+	}
+	err = service.DownloadYoutubeVideo(w, videoURL, iTagNo)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, errors.New("error while downloading"))
 		return

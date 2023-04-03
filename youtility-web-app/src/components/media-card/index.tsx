@@ -5,6 +5,7 @@ import { limit } from "@/lib/utils";
 
 import { BsDownload } from 'react-icons/bs';
 import { BASE_URL } from "@/lib/axios";
+import { useCallback, useMemo, useState } from "react";
 
 
 interface Props extends YoutubeVideoDetail {
@@ -12,9 +13,8 @@ interface Props extends YoutubeVideoDetail {
 }
 
 function MediaCard({ title, duration, thumbnail, url, formats }: Props) {
-    console.log(formats);
 
-    const options: DropdownItem[] = formats.map(format => {
+    const options: DropdownItem[] = useMemo(() => formats.map(format => {
         const mimeType = format.mimeType.split(';')[0];
         const isVideo = mimeType === "video/mp4";
         let label: string;
@@ -28,7 +28,13 @@ function MediaCard({ title, duration, thumbnail, url, formats }: Props) {
             label,
             value: format.itag.toString(),
         }
-    });
+    }), [formats]);
+
+    
+
+    const [format, setFormat] = useState(options[0]);
+
+    const onFormatChange = useCallback((option: DropdownItem) => setFormat(option), []);
 
     return (
         <div className="flex md:flex-row flex-col gap-2 mt-16 border-2 justify-center items-center shadow-lg">
@@ -41,13 +47,13 @@ function MediaCard({ title, duration, thumbnail, url, formats }: Props) {
                 <div className="flex mt-4 justify-between">
                     <Dropdown
                         options={options}
-                        value={options[0]}
-                        onChange={(option) => console.log(option)}
+                        value={format}
+                        onChange={onFormatChange}
                     />
                     <a
                         title="Download"
                         className="border rounded md:p-3 p-1 shadow bg-black text-white text-lg"
-                        href={`${BASE_URL}/youtube/download?video_url=${url}`}
+                        href={`${BASE_URL}/youtube/download?video_url=${url}&format=${format.value}`}
                     >
                         <BsDownload />
                     </a>

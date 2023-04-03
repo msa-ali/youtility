@@ -31,6 +31,11 @@ type YoutubeVideoDetail struct {
 	Formats    []YoutubeMediaFormat `json:"formats"`
 }
 
+const (
+	VIDEO_MIME_TYPE = "video/mp4"
+	AUDIO_MIME_TYPE = "audio/mp4"
+)
+
 func getYoutubeService() (*youtube.Service, error) {
 	youtubeDataApiKey := os.Getenv("YOUTUBE_DATA_API_KEY")
 	httpClient := &http.Client{
@@ -66,6 +71,11 @@ func extractVideoIdFromURL(videoURL string) (videoId string, err error) {
 	return
 }
 
+func getMimeType(f ytd.Format) string {
+	mimeType := strings.Split(f.MimeType, ";")[0]
+	return mimeType
+}
+
 func getAvailableFormats(videoId string) ([]YoutubeMediaFormat, error) {
 	client := ytd.Client{}
 	video, err := client.GetVideo(videoId)
@@ -73,16 +83,12 @@ func getAvailableFormats(videoId string) ([]YoutubeMediaFormat, error) {
 		return nil, err
 	}
 
-	getMimeType := func(f ytd.Format) string {
-		mimeType := strings.Split(f.MimeType, ";")[0]
-		return mimeType
-	}
 	// filter formats
 	var filteredFormats []ytd.Format
 	unique := make(map[string]bool)
 	for _, f := range video.Formats {
 		mimeType := getMimeType(f)
-		if mimeType == "video/mp4" || mimeType == "audio/mp4" {
+		if mimeType == VIDEO_MIME_TYPE || mimeType == AUDIO_MIME_TYPE {
 			key := fmt.Sprintf("%s|%s", f.QualityLabel, mimeType)
 			if _, found := unique[key]; !found {
 				unique[key] = true
@@ -140,7 +146,7 @@ func (ytService *YoutubeService) GetYoutubeVideoDetails(videoURL string, part []
 	return videos, nil
 }
 
-func DownloadYoutubeVideo(w http.ResponseWriter, videoURL string) error {
+func DownloadYoutubeVideo(w http.ResponseWriter, videoURL string, iTagNo int) error {
 
 	errHandler := func(err error) error {
 		logger.Error("Error copying video data: %v" + err.Error())
@@ -158,14 +164,20 @@ func DownloadYoutubeVideo(w http.ResponseWriter, videoURL string) error {
 	if err != nil {
 		return errHandler(err)
 	}
-	formats := video.Formats.WithAudioChannels()
-	stream, _, err := client.GetStream(video, &formats[0])
+	format := video.Formats.FindByItag(iTagNo)
+	stream, _, err := client.GetStream(video, format)
 
 	if err != nil {
 		return errHandler(err)
 	}
-	w.Header().Set("Content-Type", "video/mp4")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.mp4", video.Title))
+	w.Header().Set("Content-Type", format.MimeType)
+	var filename string
+	if getMimeType(*format) == VIDEO_MIME_TYPE {
+		filename = fmt.Sprintf("filename=%s.%s", video.Title, "mp4")
+	} else {
+		filename = fmt.Sprintf("filename=%s.%s", video.Title, "mp3")
+	}
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; %s", filename))
 
 	bufferSize := 1024 * 1000 // 2MB buffer size
 	buffer := make([]byte, bufferSize)
