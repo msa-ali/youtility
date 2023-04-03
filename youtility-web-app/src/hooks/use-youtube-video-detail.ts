@@ -1,7 +1,7 @@
 import { YoutubeVideoDetail } from "@/types/youtube";
 import { axios } from '@/lib/axios';
 import { useEffect, useState } from "react";
-import { formatDuration, isValidUrl } from "@/lib/utils";
+import { formatDuration, isValidURL } from "@/lib/utils";
 
 const getYoutubeVideoDetail = (url: string): Promise<YoutubeVideoDetail[]> => {
     return axios.get('/youtube/details', {
@@ -17,7 +17,7 @@ const useYoutubeVideoDetail = (url: string) => {
     const [error, setError] = useState<Error | undefined>();
 
     useEffect(() => {
-        if (!url || !isValidUrl(url)) {
+        if (!url || !isValidURL(url)) {
             return;
         }
         setLoading(true);

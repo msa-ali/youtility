@@ -1,14 +1,15 @@
 import { useSearch } from "@/context/search";
 import tw from "tailwind-styled-components";
-import debounce from 'lodash.debounce';
-import { ChangeEventHandler, useCallback } from "react";
+import { ChangeEventHandler, useState } from "react";
+import { isValidURL } from "@/lib/utils";
 const Wrapper = tw.div`
     w-full
     flex
-    flex-row
+    flex-col
+    gap-1
+    mt-16
     justify-center
     items-center
-    mt-16
 `;
 
 const Input = tw.input`
@@ -24,22 +25,14 @@ const Input = tw.input`
     focus:outline-0
 `;
 
-const Button = tw.button`
-    p-4
-    h-16
-    text-xl
-    bg-black
-    text-white
-    border-2
-    border-l-0
-  border-blue-300
-`;
-
 export default function Search() {
     const [value, setValue] = useSearch();
+    const [invalid, setInvalid] = useState(false);
 
     const onChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-        setValue(event.target.value);
+        const text = event.target.value;
+        setValue(text);
+        setInvalid(text ? !isValidURL(text) : false);
     }
 
     return (
@@ -50,7 +43,15 @@ export default function Search() {
                 placeholder="Paste a link here to download your video"
                 onChange={onChange}
             />
-            <Button>Download</Button>
+            {invalid && <div className="text-red-500 text-sm border-2 border-red-300 p-4 mt-4 flex flex-col gap-2 tracking-wide shadow-lg rounded-xl">
+                <p>Invalid URL format <span className="text-xl">😪</span>. Please enter a valid YouTube video URL in one of the following formats:</p>
+                <ul className="list-disc self-center">
+                    <li>https://www.youtube.com/watch?v=videoId</li>
+                    <li>https://www.youtube.com/playlist?list=playlistId</li>
+                </ul>
+                <p>Make sure to replace "videoId" or "playlistId" with the actual ID of the video or playlist you want to download.</p>
+            </div>
+            }
         </Wrapper>
     )
 }

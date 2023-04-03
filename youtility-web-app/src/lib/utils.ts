@@ -2,11 +2,19 @@ import { parse, toSeconds } from "iso8601-duration";
 import humanizeDuration from 'humanize-duration';
 import { YoutubeVideoDetail } from "@/types/youtube";
 
-export function isValidUrl(url: string) {
+export const isValidURL = (text: string): boolean => {
     try {
-        new URL(url);
-        return true;
-    } catch (err) {
+        const url = new URL(text);
+        if (
+            url.hostname === "www.youtube.com" &&
+            (url.pathname === "/watch" && url.search.includes("?v=") ||
+                url.pathname === "/playlist" && url.search.includes("?list=")) &&
+            url.search.split("=")[1].length > 0
+        ) {
+            return true
+        }
+        return false
+    } catch (error) {
         return false;
     }
 }
