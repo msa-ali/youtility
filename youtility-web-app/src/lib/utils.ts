@@ -1,14 +1,15 @@
-import { parse, toSeconds } from "iso8601-duration";
 import humanizeDuration from 'humanize-duration';
 import { YoutubeVideoDetail } from "@/types/youtube";
+
+export const isVideo = (url: URL) => url.pathname === "/watch" && url.search.includes("?v=");
+export const isPlaylist = (url: URL) => url.pathname === "/playlist" && url.search.includes("?list=");
 
 export const isValidURL = (text: string): boolean => {
     try {
         const url = new URL(text);
         if (
             url.hostname === "www.youtube.com" &&
-            (url.pathname === "/watch" && url.search.includes("?v=") ||
-                url.pathname === "/playlist" && url.search.includes("?list=")) &&
+            (isVideo(url) || isPlaylist(url)) &&
             url.search.split("=")[1].length > 0
         ) {
             return true
@@ -22,7 +23,7 @@ export const isValidURL = (text: string): boolean => {
 export function formatDuration(video: YoutubeVideoDetail): YoutubeVideoDetail {
     return {
         ...video,
-        duration: humanizeDuration(toSeconds(parse(video.duration)) * 1000),
+        duration: humanizeDuration(video.duration as number),
     };
 }
 

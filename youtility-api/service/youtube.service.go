@@ -27,7 +27,7 @@ type YoutubeVideoDetail struct {
 	VideoId   string               `json:"videoId"`
 	Title     string               `json:"title"`
 	Thumbnail string               `json:"thumbnail"`
-	Duration  string               `json:"duration"`
+	Duration  int64                `json:"duration"`
 	Formats   []YoutubeMediaFormat `json:"formats"`
 }
 
@@ -76,13 +76,7 @@ func getMimeType(f ytd.Format) string {
 	return mimeType
 }
 
-func getAvailableFormats(videoId string, client ytd.Client) ([]YoutubeMediaFormat, error) {
-	video, err := client.GetVideo(videoId)
-	if err != nil {
-		return nil, err
-	}
-
-	// filter formats
+func filterFormats(video *ytd.Video) []YoutubeMediaFormat {
 	var filteredFormats []ytd.Format
 	unique := make(map[string]bool)
 	for _, f := range video.Formats {
@@ -105,7 +99,15 @@ func getAvailableFormats(videoId string, client ytd.Client) ([]YoutubeMediaForma
 			MimeType:     format.MimeType,
 		})
 	}
-	return formats, nil
+	return formats
+}
+
+func getAvailableFormats(videoId string, client ytd.Client) ([]YoutubeMediaFormat, error) {
+	video, err := client.GetVideo(videoId)
+	if err != nil {
+		return nil, err
+	}
+	return filterFormats(video), nil
 }
 
 func getVideoDetails(data *youtube.VideoListResponse) (*[]YoutubeVideoDetail, error) {
@@ -120,14 +122,14 @@ func getVideoDetails(data *youtube.VideoListResponse) (*[]YoutubeVideoDetail, er
 			VideoId:   video.Id,
 			Title:     video.Snippet.Title,
 			Thumbnail: video.Snippet.Thumbnails.Medium.Url,
-			Duration:  video.ContentDetails.Duration,
+			Duration:  0, //video.ContentDetails.Duration,
 			Formats:   formats,
 		})
 	}
 	return &videos, nil
 }
 
-func (ytService *YoutubeService) GetYoutubeVideoDetails(videoURL string, part []string) (*[]YoutubeVideoDetail, error) {
+func (ytService *YoutubeService) GetYoutubeVideoDetailsUsingYoutubeDataAPI(videoURL string, part []string) (*[]YoutubeVideoDetail, error) {
 	// parse video id from the URL
 	videoId, err := extractVideoIdFromURL(videoURL, "v")
 	if err != nil {
@@ -161,7 +163,7 @@ func (ytService *YoutubeService) GetYoutubePlaylistDetails(playlistUrl string) (
 				Title:     video.Title,
 				Formats:   formats,
 				Thumbnail: video.Thumbnails[0].URL,
-				Duration:  video.Duration.String(),
+				Duration:  video.Duration.Milliseconds(),
 			})
 
 			defer wg.Done()
@@ -169,6 +171,78 @@ func (ytService *YoutubeService) GetYoutubePlaylistDetails(playlistUrl string) (
 	}
 	wg.Wait()
 	return &res, nil
+}
+
+func (ytService *YoutubeService) GetYoutubePlaylistDetailsUsingYoutubeDataAPI(playlistUrl string) (*[]YoutubeVideoDetail, error) {
+	playlistId, err := extractVideoIdFromURL(playlistUrl, "list")
+	if err != nil {
+		return nil, err
+	}
+	playlistItemsCall := ytService.
+		service.
+		PlaylistItems.
+		List([]string{"snippet"}).
+		PlaylistId(playlistId).
+		MaxResults(50)
+
+	var allVideos []*youtube.PlaylistItem
+
+	for {
+		playlistItemsResponse, err := playlistItemsCall.Do()
+		if err != nil {
+			panic(err)
+		}
+		allVideos = append(allVideos, playlistItemsResponse.Items...)
+		nextPageToken := playlistItemsResponse.NextPageToken
+		if nextPageToken == "" {
+			break
+		}
+		playlistItemsCall.PageToken(nextPageToken)
+	}
+	var wg sync.WaitGroup
+	var res []YoutubeVideoDetail
+	for _, item := range allVideos {
+		wg.Add(1)
+		func(item *youtube.PlaylistItem) {
+			defer wg.Done()
+			videoResponse, err := ytService.service.Videos.
+				List([]string{"snippet", "contentDetails"}).
+				Id(item.Snippet.ResourceId.VideoId).Do()
+			if err != nil {
+				return
+			}
+			data, err := getVideoDetails(videoResponse)
+			if err != nil {
+				return
+			}
+			res = append(res, *data...)
+		}(item)
+	}
+	wg.Wait()
+	return &res, nil
+}
+
+func (ytService *YoutubeService) GetYoutubeVideoDetails(videoURL string, part []string) (*[]YoutubeVideoDetail, error) {
+	client := ytd.Client{}
+	videoId, err := extractVideoIdFromURL(videoURL, "v")
+	if err != nil {
+		logger.Error("Error while extracting video id from url: " + err.Error())
+		return nil, err
+	}
+	video, err := client.GetVideo(videoId)
+	if err != nil {
+		logger.Error("Error while extracting video by videoId: " + err.Error())
+		return nil, err
+	}
+	formats := filterFormats(video)
+	videoDetail := YoutubeVideoDetail{
+		VideoId:   video.ID,
+		Title:     video.Title,
+		Formats:   formats,
+		Thumbnail: video.Thumbnails[len(video.Thumbnails)-1].URL,
+		Duration:  video.Duration.Milliseconds(),
+	}
+	return &[]YoutubeVideoDetail{videoDetail}, nil
 }
 
 func DownloadYoutubeVideo(w http.ResponseWriter, videoURL string, iTagNo int) error {

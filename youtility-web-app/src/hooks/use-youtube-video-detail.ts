@@ -1,7 +1,7 @@
 import { YoutubeVideoDetail } from "@/types/youtube";
 import { axios } from '@/lib/axios';
 import { useEffect, useState } from "react";
-import { formatDuration, isValidURL } from "@/lib/utils";
+import { formatDuration, isValidURL, isVideo } from "@/lib/utils";
 
 const getYoutubeVideoDetail = (url: string): Promise<YoutubeVideoDetail[]> => {
     return axios.get('/youtube/details', {
@@ -10,6 +10,16 @@ const getYoutubeVideoDetail = (url: string): Promise<YoutubeVideoDetail[]> => {
         },
     }).then(res => res.data);
 }
+
+const getYoutubePlaylistDetail = (url: string): Promise<YoutubeVideoDetail[]> => {
+    return axios.get('/youtube/playlist/details', {
+        params: {
+            playlist_url: url,
+        },
+    }).then(res => res.data);
+}
+
+
 
 const useYoutubeVideoDetail = (url: string) => {
     const [data, setData] = useState<YoutubeVideoDetail[]>([]);
@@ -21,7 +31,8 @@ const useYoutubeVideoDetail = (url: string) => {
             return;
         }
         setLoading(true);
-        getYoutubeVideoDetail(url)
+        const fetchData = isVideo(new URL(url)) ? getYoutubeVideoDetail : getYoutubePlaylistDetail;
+        fetchData(url)
             .then(videos => {
                 setData(videos.map(formatDuration));
                 setError(undefined);
@@ -33,7 +44,7 @@ const useYoutubeVideoDetail = (url: string) => {
 
 
     }, [url])
-    return {data, loading, error};
+    return { data, loading, error };
 }
 
 export default useYoutubeVideoDetail;
