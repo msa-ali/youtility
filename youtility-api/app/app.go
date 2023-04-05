@@ -1,10 +1,9 @@
 package app
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/Altamashattari/youtility/logger"
 	"github.com/Altamashattari/youtility/service"
@@ -15,9 +14,11 @@ import (
 
 func sanityCheck() {
 	if os.Getenv("YOUTUBE_DATA_API_KEY") == "" ||
-		os.Getenv("SERVER_ADDRESS") == "" ||
-		os.Getenv("SERVER_PORT") == "" {
-		log.Fatal("Environmnetal variables are not defined")
+		// os.Getenv("SERVER_ADDRESS") == "" ||
+		// os.Getenv("SERVER_PORT") == "" ||
+		os.Getenv("ALLOWED_ORIGIN") == "" {
+		logger.Error("Environmnetal variables are not defined")
+		os.Exit(1)
 	}
 }
 
@@ -25,7 +26,6 @@ func Start() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		logger.Error("error while loading env vars. Err: %s" + err.Error())
-		os.Exit(1)
 	}
 	sanityCheck()
 
@@ -53,18 +53,23 @@ func Start() {
 		Methods(http.MethodGet).
 		Name("GetPlaylistDetails")
 
-	address := os.Getenv("SERVER_ADDRESS")
-	port := os.Getenv("SERVER_PORT")
+	// address := os.Getenv("SERVER_ADDRESS")
+	// port := os.Getenv("SERVER_PORT")
 
 	// CORS
+	allowedOrigins := strings.Split(os.Getenv("ALLOWED_ORIGIN"), ",")
+	if len(allowedOrigins) == 0 {
+		allowedOrigins = []string{"*"}
+	}
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins:   allowedOrigins,
 		AllowCredentials: true,
 	})
 
 	handler := c.Handler(router)
 
-	err = http.ListenAndServe(fmt.Sprintf("%s:%s", address, port), handler)
+	// err = http.ListenAndServe(fmt.Sprintf("%s:%s", address, port), handler)
+	err = http.ListenAndServe(":8080", handler)
 	if err != nil {
 		logger.Error("error while starting server" + err.Error())
 		os.Exit(1)

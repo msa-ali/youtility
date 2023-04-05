@@ -5,7 +5,7 @@ import { formatDuration, isValidURL, isVideo } from "@/lib/utils";
 import { AxiosError } from "axios";
 
 const getYoutubeVideoDetail = (url: string): Promise<YoutubeVideoDetail[]> => {
-    return axios.get('/youtube/details', {
+    return axios.get('/api/youtube/details', {
         params: {
             video_url: url,
         },
@@ -13,7 +13,7 @@ const getYoutubeVideoDetail = (url: string): Promise<YoutubeVideoDetail[]> => {
 }
 
 const getYoutubePlaylistDetail = (url: string): Promise<YoutubeVideoDetail[]> => {
-    return axios.get('/youtube/playlist/details', {
+    return axios.get('/api/youtube/playlist/details', {
         params: {
             playlist_url: url,
         },

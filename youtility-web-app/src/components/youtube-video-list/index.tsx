@@ -20,8 +20,7 @@ function YoutubeVideoList() {
         console.log(error);
         return (
             <Error>
-                {error.response?.status === 400 && <p className="text-sm">Please provide valid URL <span className="text-xl">🥹</span></p>}
-                {error.response?.status === 500 && <p className="text-sm">OOPS! something went wrong!<span className="text-xl">🥹</span></p>}
+                {error.response?.status === 400 ? <p className="text-sm">Please provide valid URL <span className="text-xl">🥹</span></p> : <p className="text-sm">OOPS! something went wrong!<span className="text-xl">🥹</span></p>}
 
             </Error>
         );

@@ -37,3 +37,4 @@ youtility-web-app/next-env.d.ts
 
 # API
 **/.env
+**/.azure
