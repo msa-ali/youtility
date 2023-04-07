@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -86,25 +85,6 @@ func getAvailableFormats(videoId string, client ytd.Client) ([]YoutubeMediaForma
 	return filterFormats(video), nil
 }
 
-func getVideoDetails(data *youtube.VideoListResponse) (*[]YoutubeVideoDetail, error) {
-	var videos []YoutubeVideoDetail
-	if len(data.Items) == 0 {
-		return nil, errors.New("content not found")
-	}
-	client := ytd.Client{}
-	for _, video := range data.Items {
-		formats, _ := getAvailableFormats(video.Id, client)
-		videos = append(videos, YoutubeVideoDetail{
-			VideoId:   video.Id,
-			Title:     video.Snippet.Title,
-			Thumbnail: video.Snippet.Thumbnails.Medium.Url,
-			Duration:  0, //video.ContentDetails.Duration,
-			Formats:   formats,
-		})
-	}
-	return &videos, nil
-}
-
 func (ytService *YoutubeService) GetYoutubePlaylistDetails(playlistUrl string) (*[]YoutubeVideoDetail, error) {
 	client := ytd.Client{}
 	p, err := client.GetPlaylist(playlistUrl)
@@ -134,11 +114,6 @@ func (ytService *YoutubeService) GetYoutubePlaylistDetails(playlistUrl string) (
 
 func (ytService *YoutubeService) GetYoutubeVideoDetails(videoId string) (*[]YoutubeVideoDetail, error) {
 	client := ytd.Client{}
-	// videoId, err := extractVideoIdFromURL(videoURL, "v")
-	// if err != nil {
-	// 	logger.Error("Error while extracting video id from url: " + err.Error())
-	// 	return nil, err
-	// }
 	video, err := client.GetVideo(videoId)
 	if err != nil {
 		logger.Error("Error while extracting video by videoId: " + err.Error())
@@ -163,11 +138,6 @@ func DownloadYoutubeVideo(w http.ResponseWriter, videoId string, iTagNo int) err
 	}
 
 	client := ytd.Client{}
-	// videoId, err := extractVideoIdFromURL(videoURL, "v")
-	// if err != nil {
-	// 	logger.Error("Error while extracting video id from url: " + err.Error())
-	// 	return err
-	// }
 	video, err := client.GetVideo(videoId)
 
 	if err != nil {
@@ -188,7 +158,7 @@ func DownloadYoutubeVideo(w http.ResponseWriter, videoId string, iTagNo int) err
 	}
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; %s", filename))
 
-	bufferSize := 1024 * 1000 // 2MB buffer size
+	bufferSize := 64 * 1000 // 64kb buffer size
 	buffer := make([]byte, bufferSize)
 
 	_, err = io.CopyBuffer(w, stream, buffer)

@@ -1,10 +1,12 @@
 package service
 
 import (
+	"errors"
 	"net/http"
 	"os"
 	"sync"
 
+	ytd "github.com/kkdai/youtube/v2"
 	"google.golang.org/api/googleapi/transport"
 	"google.golang.org/api/youtube/v3"
 )
@@ -29,6 +31,25 @@ func NewYoutubeService() (*YoutubeService, error) {
 		return nil, err
 	}
 	return &YoutubeService{service}, nil
+}
+
+func getVideoDetails(data *youtube.VideoListResponse) (*[]YoutubeVideoDetail, error) {
+	var videos []YoutubeVideoDetail
+	if len(data.Items) == 0 {
+		return nil, errors.New("content not found")
+	}
+	client := ytd.Client{}
+	for _, video := range data.Items {
+		formats, _ := getAvailableFormats(video.Id, client)
+		videos = append(videos, YoutubeVideoDetail{
+			VideoId:   video.Id,
+			Title:     video.Snippet.Title,
+			Thumbnail: video.Snippet.Thumbnails.Medium.Url,
+			Duration:  0, //video.ContentDetails.Duration,
+			Formats:   formats,
+		})
+	}
+	return &videos, nil
 }
 
 func (ytService *YoutubeService) GetYoutubeVideoDetailsUsingYoutubeDataAPI(videoURL string) (*[]YoutubeVideoDetail, error) {

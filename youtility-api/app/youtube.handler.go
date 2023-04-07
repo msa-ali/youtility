@@ -27,12 +27,6 @@ func (h YoutubeHandler) GetVideoDetails(w http.ResponseWriter, r *http.Request) 
 func (h YoutubeHandler) DownloadVideo(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	iTag := mux.Vars(r)["itag"]
-	// videoURL := r.URL.Query().Get("video_url")
-	// format := r.URL.Query().Get("format")
-	// if videoURL == "" || format == "" {
-	// 	writeResponse(w, http.StatusBadRequest, errors.New("video url or format is missing"))
-	// 	return
-	// }
 	iTagNo, err := strconv.Atoi(iTag)
 	if err != nil {
 		writeResponse(w, http.StatusBadRequest, errors.New("invalid video format"))
