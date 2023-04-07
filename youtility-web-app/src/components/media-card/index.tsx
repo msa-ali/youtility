@@ -12,7 +12,7 @@ interface Props extends YoutubeVideoDetail {
     url: string;
 }
 
-function MediaCard({ title, duration, thumbnail, url, formats }: Props) {
+function MediaCard({ title, duration, thumbnail, url, formats, videoId }: Props) {
 
     const options: DropdownItem[] = useMemo(() => formats.map(format => {
         const mimeType = format.mimeType.split(';')[0];
@@ -37,12 +37,12 @@ function MediaCard({ title, duration, thumbnail, url, formats }: Props) {
     const onFormatChange = useCallback((option: DropdownItem) => setFormat(option), []);
 
     return (
-        <div className="flex md:flex-row flex-col gap-2 mt-16 border-2 justify-center items-center shadow-lg">
+        <div className="flex md:flex-row flex-col gap-2 mt-8 mb-8 border-2 justify-center items-center shadow-lg">
             <div>
                 <Image title={title} alt="video-thumbnail" src={thumbnail} width={300} height={200} loader={() => thumbnail} />
             </div>
             <div className="flex flex-col p-4 flex-nowrap">
-                <div className="text-lg whitespace-nowrap md:tracking-wide" title={title}>{limit(title, 50)}</div>
+                <div className="text-lg md:whitespace-nowrap md:tracking-wide whitespace-pre-wrap" title={title}>{limit(title, 50)}</div>
                 <div className="text-md text-xs text-gray-500 mt-1">{duration}</div>
                 <div className="flex mt-4 justify-between">
                     <Dropdown
@@ -52,10 +52,10 @@ function MediaCard({ title, duration, thumbnail, url, formats }: Props) {
                     />
                     <a
                         title="Download"
-                        className="border rounded md:p-3 p-1 shadow bg-black text-white text-lg"
-                        href={`${BASE_URL}/api/youtube/download?video_url=${url}&format=${format.value}`}
+                        className="border rounded md:p-3 px-2 py-1 shadow bg-black text-white text-lg flex justify-center items-center"
+                        href={`${BASE_URL}/api/youtube/download/${videoId}/${format.value}`}
                     >
-                        <BsDownload />
+                        <BsDownload />&nbsp; Download
                     </a>
                 </div>
             </div>

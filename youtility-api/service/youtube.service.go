@@ -132,13 +132,13 @@ func (ytService *YoutubeService) GetYoutubePlaylistDetails(playlistUrl string) (
 	return &res, nil
 }
 
-func (ytService *YoutubeService) GetYoutubeVideoDetails(videoURL string, part []string) (*[]YoutubeVideoDetail, error) {
+func (ytService *YoutubeService) GetYoutubeVideoDetails(videoId string) (*[]YoutubeVideoDetail, error) {
 	client := ytd.Client{}
-	videoId, err := extractVideoIdFromURL(videoURL, "v")
-	if err != nil {
-		logger.Error("Error while extracting video id from url: " + err.Error())
-		return nil, err
-	}
+	// videoId, err := extractVideoIdFromURL(videoURL, "v")
+	// if err != nil {
+	// 	logger.Error("Error while extracting video id from url: " + err.Error())
+	// 	return nil, err
+	// }
 	video, err := client.GetVideo(videoId)
 	if err != nil {
 		logger.Error("Error while extracting video by videoId: " + err.Error())
@@ -155,7 +155,7 @@ func (ytService *YoutubeService) GetYoutubeVideoDetails(videoURL string, part []
 	return &[]YoutubeVideoDetail{videoDetail}, nil
 }
 
-func DownloadYoutubeVideo(w http.ResponseWriter, videoURL string, iTagNo int) error {
+func DownloadYoutubeVideo(w http.ResponseWriter, videoId string, iTagNo int) error {
 
 	errHandler := func(err error) error {
 		logger.Error("Error copying video data: %v" + err.Error())
@@ -163,11 +163,11 @@ func DownloadYoutubeVideo(w http.ResponseWriter, videoURL string, iTagNo int) er
 	}
 
 	client := ytd.Client{}
-	videoId, err := extractVideoIdFromURL(videoURL, "v")
-	if err != nil {
-		logger.Error("Error while extracting video id from url: " + err.Error())
-		return err
-	}
+	// videoId, err := extractVideoIdFromURL(videoURL, "v")
+	// if err != nil {
+	// 	logger.Error("Error while extracting video id from url: " + err.Error())
+	// 	return err
+	// }
 	video, err := client.GetVideo(videoId)
 
 	if err != nil {

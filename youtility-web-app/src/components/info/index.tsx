@@ -11,7 +11,7 @@ const Wrapper = tw.div`
 export default function Info() {
   return (
     <Wrapper>
-        <div className="text-3xl mt-16 text-gray-600 font-bold tracking-wider">
+        <div className="md:text-3xl text-xl mt-16 text-gray-600 font-bold tracking-wider">
             Youtube Video Downloader
         </div>
         <div className="text-sm mt-4 text-gray-600 font-bold tracking-wider">

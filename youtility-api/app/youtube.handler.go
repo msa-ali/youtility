@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/Altamashattari/youtility/service"
+	"github.com/gorilla/mux"
 )
 
 type YoutubeHandler struct {
@@ -14,35 +15,30 @@ type YoutubeHandler struct {
 }
 
 func (h YoutubeHandler) GetVideoDetails(w http.ResponseWriter, r *http.Request) {
-	videoURL := r.URL.Query().Get("video_url")
-	if videoURL == "" {
-		writeResponse(w, http.StatusBadRequest, errors.New("video url is missing"))
-		return
-	}
-
-	data, err := h.service.GetYoutubeVideoDetails(videoURL, []string{"snippet", "contentDetails"})
-
+	id := mux.Vars(r)["id"]
+	data, err := h.service.GetYoutubeVideoDetails(id)
 	if err != nil {
 		writeResponse(w, http.StatusBadRequest, errors.New("video url is invalid"))
 		return
 	}
-
 	writeResponse(w, http.StatusOK, data)
 }
 
 func (h YoutubeHandler) DownloadVideo(w http.ResponseWriter, r *http.Request) {
-	videoURL := r.URL.Query().Get("video_url")
-	format := r.URL.Query().Get("format")
-	if videoURL == "" || format == "" {
-		writeResponse(w, http.StatusBadRequest, errors.New("video url or format is missing"))
-		return
-	}
-	iTagNo, err := strconv.Atoi(format)
+	id := mux.Vars(r)["id"]
+	iTag := mux.Vars(r)["itag"]
+	// videoURL := r.URL.Query().Get("video_url")
+	// format := r.URL.Query().Get("format")
+	// if videoURL == "" || format == "" {
+	// 	writeResponse(w, http.StatusBadRequest, errors.New("video url or format is missing"))
+	// 	return
+	// }
+	iTagNo, err := strconv.Atoi(iTag)
 	if err != nil {
 		writeResponse(w, http.StatusBadRequest, errors.New("invalid video format"))
 		return
 	}
-	err = service.DownloadYoutubeVideo(w, videoURL, iTagNo)
+	err = service.DownloadYoutubeVideo(w, id, iTagNo)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, errors.New("error while downloading"))
 		return

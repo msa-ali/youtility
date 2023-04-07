@@ -31,13 +31,13 @@ func NewYoutubeService() (*YoutubeService, error) {
 	return &YoutubeService{service}, nil
 }
 
-func (ytService *YoutubeService) GetYoutubeVideoDetailsUsingYoutubeDataAPI(videoURL string, part []string) (*[]YoutubeVideoDetail, error) {
+func (ytService *YoutubeService) GetYoutubeVideoDetailsUsingYoutubeDataAPI(videoURL string) (*[]YoutubeVideoDetail, error) {
 	// parse video id from the URL
 	videoId, err := extractVideoIdFromURL(videoURL, "v")
 	if err != nil {
 		return nil, err
 	}
-	data, err := ytService.service.Videos.List(part).Id(videoId).Do()
+	data, err := ytService.service.Videos.List([]string{"snippet", "contentDetails"}).Id(videoId).Do()
 	if err != nil {
 		return nil, err
 	}

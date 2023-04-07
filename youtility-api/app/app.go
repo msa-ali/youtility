@@ -24,12 +24,12 @@ func Start() {
 	yh := YoutubeHandler{service: ytService}
 
 	router.
-		HandleFunc("/api/youtube/details", yh.GetVideoDetails).
+		HandleFunc("/api/youtube/{id}", yh.GetVideoDetails).
 		Methods(http.MethodGet).
 		Name("GetVideoDetails")
 
 	router.
-		HandleFunc("/api/youtube/download", yh.DownloadVideo).
+		HandleFunc("/api/youtube/download/{id}/{itag:[0-9]+}", yh.DownloadVideo).
 		Methods(http.MethodGet).
 		Name("Download")
 
