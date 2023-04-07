@@ -144,12 +144,13 @@ func DownloadYoutubeVideo(w http.ResponseWriter, videoId string, iTagNo int) err
 		return errHandler(err)
 	}
 	format := video.Formats.FindByItag(iTagNo)
-	stream, _, err := client.GetStream(video, format)
+	stream, contentLength, err := client.GetStream(video, format)
 
 	if err != nil {
 		return errHandler(err)
 	}
 	w.Header().Set("Content-Type", format.MimeType)
+	w.Header().Set("Content-Length", fmt.Sprint(contentLength))
 	var filename string
 	if getMimeType(*format) == VIDEO_MIME_TYPE {
 		filename = fmt.Sprintf("filename=%s.%s", video.Title, "mp4")
@@ -158,7 +159,7 @@ func DownloadYoutubeVideo(w http.ResponseWriter, videoId string, iTagNo int) err
 	}
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; %s", filename))
 
-	bufferSize := 64 * 1000 // 64kb buffer size
+	bufferSize := 1024 * 1000 // 1 mb buffer size
 	buffer := make([]byte, bufferSize)
 
 	_, err = io.CopyBuffer(w, stream, buffer)
