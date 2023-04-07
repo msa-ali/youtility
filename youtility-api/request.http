@@ -1,11 +1,11 @@
 ### GET Video details by URL
-GET http://localhost:8000/api/youtube/details?video_url=https://www.youtube.com/watch?v=Q9ipbLeqmQo&list=PLy_6D98if3ULEtXtNSY_2qN21VCKgoQAE
+GET http://localhost:8080/api/youtube/details?video_url=https://www.youtube.com/watch?v=Q9ipbLeqmQo&list=PLy_6D98if3ULEtXtNSY_2qN21VCKgoQAE
 Content-Type: application/json
 
 
 ### Download Youtube Video by URL
-GET http://localhost:8000/api/youtube/download?video_url=https://www.youtube.com/watch?v=Q9ipbLeqmQo&list=PLy_6D98if3ULEtXtNSY_2qN21VCKgoQAE
+GET http://localhost:8080/api/youtube/download?video_url=https://www.youtube.com/watch?v=Q9ipbLeqmQo&list=PLy_6D98if3ULEtXtNSY_2qN21VCKgoQAE
 
 ### GET Playlist details by URL
-GET http://localhost:8000/api/youtube/playlist/details?playlist_url=https://www.youtube.com/playlist?list=PLhnIQTsLOXPPnYJfRXqz-P4deiSFCcmeg
+GET http://localhost:8080/api/youtube/playlist/details?playlist_url=https://www.youtube.com/playlist?list=PLhnIQTsLOXPPnYJfRXqz-P4deiSFCcmeg
 Content-Type: application/json

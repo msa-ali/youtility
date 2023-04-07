@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	logger.Info("Starting the server...")
+	logger.Info("Initiating the server...")
 	app.Start()
 }

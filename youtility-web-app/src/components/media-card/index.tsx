@@ -53,7 +53,7 @@ function MediaCard({ title, duration, thumbnail, url, formats }: Props) {
                     <a
                         title="Download"
                         className="border rounded md:p-3 p-1 shadow bg-black text-white text-lg"
-                        href={`${BASE_URL}/youtube/download?video_url=${url}&format=${format.value}`}
+                        href={`${BASE_URL}/api/youtube/download?video_url=${url}&format=${format.value}`}
                     >
                         <BsDownload />
                     </a>

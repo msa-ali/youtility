@@ -6,13 +6,11 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"sync"
 
 	"github.com/Altamashattari/youtility/logger"
 	ytd "github.com/kkdai/youtube/v2"
-	"google.golang.org/api/googleapi/transport"
 	"google.golang.org/api/youtube/v3"
 )
 
@@ -36,30 +34,8 @@ const (
 	AUDIO_MIME_TYPE = "audio/mp4"
 )
 
-func getYoutubeService() (*youtube.Service, error) {
-	youtubeDataApiKey := os.Getenv("YOUTUBE_DATA_API_KEY")
-	httpClient := &http.Client{
-		Transport: &transport.APIKey{
-			Key: youtubeDataApiKey,
-		},
-	}
-	service, err := youtube.New(httpClient)
-	if err != nil {
-		return nil, err
-	}
-	return service, nil
-}
-
 type YoutubeService struct {
 	service *youtube.Service
-}
-
-func NewYoutubeService() (*YoutubeService, error) {
-	service, err := getYoutubeService()
-	if err != nil {
-		return nil, err
-	}
-	return &YoutubeService{service}, nil
 }
 
 func extractVideoIdFromURL(videoURL string, param string) (videoId string, err error) {
@@ -129,23 +105,6 @@ func getVideoDetails(data *youtube.VideoListResponse) (*[]YoutubeVideoDetail, er
 	return &videos, nil
 }
 
-func (ytService *YoutubeService) GetYoutubeVideoDetailsUsingYoutubeDataAPI(videoURL string, part []string) (*[]YoutubeVideoDetail, error) {
-	// parse video id from the URL
-	videoId, err := extractVideoIdFromURL(videoURL, "v")
-	if err != nil {
-		return nil, err
-	}
-	data, err := ytService.service.Videos.List(part).Id(videoId).Do()
-	if err != nil {
-		return nil, err
-	}
-	videos, err := getVideoDetails(data)
-	if err != nil {
-		return nil, err
-	}
-	return videos, nil
-}
-
 func (ytService *YoutubeService) GetYoutubePlaylistDetails(playlistUrl string) (*[]YoutubeVideoDetail, error) {
 	client := ytd.Client{}
 	p, err := client.GetPlaylist(playlistUrl)
@@ -168,55 +127,6 @@ func (ytService *YoutubeService) GetYoutubePlaylistDetails(playlistUrl string) (
 
 			defer wg.Done()
 		}(i, video)
-	}
-	wg.Wait()
-	return &res, nil
-}
-
-func (ytService *YoutubeService) GetYoutubePlaylistDetailsUsingYoutubeDataAPI(playlistUrl string) (*[]YoutubeVideoDetail, error) {
-	playlistId, err := extractVideoIdFromURL(playlistUrl, "list")
-	if err != nil {
-		return nil, err
-	}
-	playlistItemsCall := ytService.
-		service.
-		PlaylistItems.
-		List([]string{"snippet"}).
-		PlaylistId(playlistId).
-		MaxResults(50)
-
-	var allVideos []*youtube.PlaylistItem
-
-	for {
-		playlistItemsResponse, err := playlistItemsCall.Do()
-		if err != nil {
-			panic(err)
-		}
-		allVideos = append(allVideos, playlistItemsResponse.Items...)
-		nextPageToken := playlistItemsResponse.NextPageToken
-		if nextPageToken == "" {
-			break
-		}
-		playlistItemsCall.PageToken(nextPageToken)
-	}
-	var wg sync.WaitGroup
-	var res []YoutubeVideoDetail
-	for _, item := range allVideos {
-		wg.Add(1)
-		func(item *youtube.PlaylistItem) {
-			defer wg.Done()
-			videoResponse, err := ytService.service.Videos.
-				List([]string{"snippet", "contentDetails"}).
-				Id(item.Snippet.ResourceId.VideoId).Do()
-			if err != nil {
-				return
-			}
-			data, err := getVideoDetails(videoResponse)
-			if err != nil {
-				return
-			}
-			res = append(res, *data...)
-		}(item)
 	}
 	wg.Wait()
 	return &res, nil
