@@ -38,16 +38,20 @@ func loadEnv() {
 }
 
 func sanityCheck() {
-	if mode == DEVELOPMENT {
-		config = map[string]string{
-			YOUTUBE_DATA_API_KEY: "YOUTUBE_DATA_API_KEY",
-			ALLOWED_ORIGIN:       "ALLOWED_ORIGIN",
-		}
-	} else {
-		config = map[string]string{
-			YOUTUBE_DATA_API_KEY: "APPSETTING_YOUTUBE_DATA_API_KEY",
-			ALLOWED_ORIGIN:       "APPSETTING_ALLOWED_ORIGIN",
-		}
+	// if mode == DEVELOPMENT {
+	// 	config = map[string]string{
+	// 		YOUTUBE_DATA_API_KEY: "YOUTUBE_DATA_API_KEY",
+	// 		ALLOWED_ORIGIN:       "ALLOWED_ORIGIN",
+	// 	}
+	// } else {
+	// 	config = map[string]string{
+	// 		YOUTUBE_DATA_API_KEY: "APPSETTING_YOUTUBE_DATA_API_KEY",
+	// 		ALLOWED_ORIGIN:       "APPSETTING_ALLOWED_ORIGIN",
+	// 	}
+	// }
+	config = map[string]string{
+		YOUTUBE_DATA_API_KEY: "YOUTUBE_DATA_API_KEY",
+		ALLOWED_ORIGIN:       "ALLOWED_ORIGIN",
 	}
 	for _, value := range config {
 		logger.Info(fmt.Sprintf("Checking if Env variable is defined for '%s'", value))
