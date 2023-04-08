@@ -9,10 +9,7 @@ type URLParseResult = {
     videoId?: string;
 };
 
-export const isVideo = (url: URL) => url.hostname === "youtu.be" || (url.pathname === "/watch" && url.search.includes("?v="));
-export const isPlaylist = (url: URL) => url.pathname === "/playlist" && url.search.includes("?list=");
-
-export const parseURL = (text: string): URLParseResult  => {
+export const parseURL = (text: string): URLParseResult => {
     let result: URLParseResult = {
         isVideo: false,
         isPlaylist: false,
@@ -33,15 +30,25 @@ export const parseURL = (text: string): URLParseResult  => {
                     }
                 }
             } else if (url.pathname === "/playlist") {
-                if(!!url.query["list"]) {
+                if (!!url.query["list"]) {
                     result = {
                         ...result,
                         isPlaylist: true,
                         isValid: true,
                     }
                 }
+            } else if (url.pathname.startsWith("/shorts/")) {
+                const [,, shortId] = url.pathname.split("/");
+                if (shortId.length) {
+                    result = {
+                        ...result,
+                        videoId: shortId,
+                        isVideo: true,
+                        isValid: true,
+                    }
+                }
             }
-        } else if(hostname === "youtu.be" && url.pathname?.length && url.pathname.startsWith("/")) {
+        } else if (hostname === "youtu.be" && url.pathname?.length && url.pathname.startsWith("/")) {
             const videoId = url.pathname.replace("/", "");
             if (videoId.length > 0) {
                 result = {
@@ -55,22 +62,6 @@ export const parseURL = (text: string): URLParseResult  => {
         return result;
     } catch (err) {
         return result;
-    }
-}
-
-export const isValidURL = (text: string): boolean => {
-    try {
-        const url = new URL(text);
-        const condition1 = url.hostname === "www.youtube.com" &&
-            (isVideo(url) || isPlaylist(url)) &&
-            url.search.split("=")[1].length > 0;
-        const condition2 = url.hostname === "youtu.be" && url.pathname.length > 1;
-        if (condition1 || condition2) {
-            return true;
-        }
-        return false
-    } catch (error) {
-        return false;
     }
 }
 

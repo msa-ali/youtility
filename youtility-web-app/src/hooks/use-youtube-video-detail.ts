@@ -1,7 +1,7 @@
 import { YoutubeVideoDetail } from "@/types/youtube";
 import { axios } from '@/lib/axios';
 import { useEffect, useState } from "react";
-import { formatDuration, isValidURL, isVideo, parseURL } from "@/lib/utils";
+import { formatDuration, parseURL } from "@/lib/utils";
 import { AxiosError } from "axios";
 
 const getYoutubeVideoDetail = (id: string): Promise<YoutubeVideoDetail[]> => {

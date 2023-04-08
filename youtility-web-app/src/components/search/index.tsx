@@ -1,7 +1,7 @@
 import { useSearch } from "@/context/search";
 import tw from "tailwind-styled-components";
 import { ChangeEventHandler, useState } from "react";
-import { isValidURL } from "@/lib/utils";
+import { parseURL } from "@/lib/utils";
 import Error from "../error";
 
 const Wrapper = tw.div`
@@ -36,7 +36,12 @@ export default function Search() {
     const onChange: ChangeEventHandler<HTMLInputElement> = (event) => {
         const text = event.target.value;
         setValue(text);
-        setInvalid(text ? !isValidURL(text) : false);
+        if (text) {
+            const { isValid } = parseURL(text);
+            setInvalid(!isValid);
+        } else {
+            setInvalid(false);
+        }
     }
 
     return (
@@ -55,6 +60,7 @@ export default function Search() {
                     </p>
                     <ul className="list-disc self-center">
                         <li>https://www.youtube.com/watch?v=videoId</li>
+                        <li>https://www.youtube.com/shorts/shortId</li>
                         <li>https://youtu.be/videoId</li>
                         <li>https://www.youtube.com/playlist?list=playlistId</li>
                     </ul>
