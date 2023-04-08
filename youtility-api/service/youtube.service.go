@@ -14,10 +14,11 @@ import (
 )
 
 type YoutubeMediaFormat struct {
-	ItagNo       int    `json:"itag"`
-	QualityLabel string `json:"qualityLabel"`
-	AudioQuality string `json:"audioQuality"`
-	MimeType     string `json:"mimeType"`
+	ItagNo          int    `json:"itag"`
+	QualityLabel    string `json:"qualityLabel"`
+	AudioQuality    string `json:"audioQuality"`
+	MimeType        string `json:"mimeType"`
+	HasAudioChannel bool   `json:"hasAudioChannel"`
 }
 
 type YoutubeVideoDetail struct {
@@ -68,10 +69,11 @@ func filterFormats(video *ytd.Video) []YoutubeMediaFormat {
 	var formats []YoutubeMediaFormat
 	for _, format := range filteredFormats {
 		formats = append(formats, YoutubeMediaFormat{
-			ItagNo:       format.ItagNo,
-			QualityLabel: format.QualityLabel,
-			AudioQuality: format.AudioQuality,
-			MimeType:     format.MimeType,
+			ItagNo:          format.ItagNo,
+			QualityLabel:    format.QualityLabel,
+			AudioQuality:    format.AudioQuality,
+			MimeType:        format.MimeType,
+			HasAudioChannel: format.AudioChannels > 0,
 		})
 	}
 	return formats

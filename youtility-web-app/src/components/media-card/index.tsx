@@ -4,6 +4,7 @@ import Image from "next/image"
 import { limit } from "@/lib/utils";
 
 import { BsDownload } from 'react-icons/bs';
+import { GoMute } from 'react-icons/go';
 import { BASE_URL } from "@/lib/axios";
 import { useCallback, useMemo, useState } from "react";
 
@@ -13,16 +14,19 @@ interface Props extends YoutubeVideoDetail {
 }
 
 function MediaCard({ title, duration, thumbnail, url, formats, videoId }: Props) {
-
-    const options: DropdownItem[] = useMemo(() => formats.map(format => {
+    const sortedOptions = [...formats.filter(f => f.hasAudioChannel), ...formats.filter(f => !f.hasAudioChannel)]
+    const options: DropdownItem[] = useMemo(() => sortedOptions.map(format => {
         const mimeType = format.mimeType.split(';')[0];
         const isVideo = mimeType === "video/mp4";
-        let label: string;
+        let label: React.ReactNode;
         if (isVideo) {
-            label = `mp4 (${format.qualityLabel})`
+            label = <span className="flex justify-center items-center gap-2">
+                mp4 ({format.qualityLabel}) 
+                {!format.hasAudioChannel ? <GoMute title="No audio available for this video format" /> : null } 
+                </span>
         } else {
             const quality = format.audioQuality.split("_")[2]
-            label = `mp3 (${quality?.toLowerCase()})`
+            label = <span className="flex justify-center items-center gap-2">mp3 ({quality?.toLowerCase()})</span>
         }
         return {
             label,

@@ -3,7 +3,7 @@ import { GoChevronDown } from 'react-icons/go';
 import Panel from "../panel";
 
 export type DropdownItem = {
-    label: string;
+    label: React.ReactNode;
     value: string;
 }
 

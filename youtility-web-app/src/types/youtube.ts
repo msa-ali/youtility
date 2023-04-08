@@ -3,6 +3,7 @@ export interface YoutubeMediaFormat {
     mimeType: string;
     qualityLabel: string;
     audioQuality: string;
+    hasAudioChannel: boolean;
 }
 
 
