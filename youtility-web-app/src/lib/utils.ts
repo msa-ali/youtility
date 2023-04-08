@@ -18,7 +18,10 @@ export const parseURL = (text: string): URLParseResult => {
     try {
         const url = parseUrl(text);
         const hostname = url.resource;
-        if (hostname === "www.youtube.com") {
+        if (
+            hostname === "www.youtube.com" ||
+            hostname === "youtube.com"
+        ) {
             if (url.pathname === "/watch") {
                 const videoId = url.query["v"];
                 if (!!videoId) {
