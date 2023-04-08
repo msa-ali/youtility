@@ -2,7 +2,7 @@
 
 <img src="preview.jpeg"  width="600" height="300">
 
-Youtility is a web application built with Next.JS and Golang that provides a simple UI interface to download YouTube videos or playlists by URL. It provides support for multiple video qualities and audio as well.
+Youtility is a web application built with Next.JS and Golang that provides a simple UI interface to download YouTube videos, shorts or playlists by URL. It provides support for multiple video qualities and audio as well.
 
 ## Getting Started
 
@@ -43,7 +43,7 @@ To download a YouTube video or playlist, simply copy its URL and paste it in the
 
 ## Features
 
-- Download YouTube videos and playlists by URL
+- Download YouTube videos, shorts and playlists by URL
 - Support for multiple formats such as video and audio.
 - User-friendly interface
 
